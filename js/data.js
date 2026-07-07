@@ -181,11 +181,20 @@ function buildDemoMails(records) {
     .reverse();
 }
 
+/* ── 실데이터를 쓸 위치인지 판별 ──
+   개인정보 보호: 본인 PC(localhost/127.0.0.1/파일 직접 열기)에서만 실제 시트를 읽고,
+   인터넷에 배포된 공개 주소(github.io 등)에서는 자동으로 데모 데이터만 표시한다.
+   → 공개 사이트 방문자에게 실명·이메일이 노출되지 않음 */
+function isLocalEnvironment() {
+  const h = location.hostname;
+  return location.protocol === "file:" || h === "localhost" || h === "127.0.0.1" || h === "";
+}
+
 /* ── 공개 API: 페이지에서 이것만 사용 ── */
 async function loadData() {
   let records = null, mails = null, demo = false;
 
-  if (CONFIG.SHEET.id) {
+  if (CONFIG.SHEET.id && isLocalEnvironment()) {
     try { records = await fetchAttendance(); } catch (e) { console.warn("출결 시트 읽기 실패", e); }
     try { mails = await fetchMailLog(); } catch (e) { console.warn("발송 로그 읽기 실패", e); }
   }
