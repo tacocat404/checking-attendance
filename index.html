@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출결기록실 — 오늘</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+
+  <!-- 마스트헤드 -->
+  <div class="mast-meta">
+    <span data-mast-date>—</span>
+    <span><span class="dot-ok">●</span>&nbsp; <span data-sync-label>SHEETS 동기화</span></span>
+    <span class="meta-email" data-mast-email>이메일을 설정하세요</span>
+  </div>
+  <header class="mast">
+    <h1 class="wordmark"><a href="index.html">출결기록실</a><small>ATTENDANCE ARCHIVE · 실무프로젝트 1</small></h1>
+    <nav class="index">
+      <div class="idx-label">색인</div>
+      <a class="on" href="index.html"><b>01</b>오늘</a>
+      <a href="history.html"><b>02</b>근태 내역</a>
+      <a href="stats.html"><b>03</b>통계</a>
+      <a href="mail.html"><b>04</b>메일 이력</a>
+    </nav>
+  </header>
+  <hr class="rule-heavy">
+
+  <!-- 펀치 -->
+  <section class="punch-sec">
+    <div class="p-grid">
+      <div class="fx">
+        <div class="p-date">현재 시각 — 서울</div>
+        <div class="clock" id="clock">--:--</div>
+        <div class="p-actions">
+          <button class="p-btn" data-check-in>출근 체크 <span class="arr">→</span></button>
+          <button class="p-btn" data-check-out>퇴근 체크 <span class="arr">→</span></button>
+        </div>
+        <div class="p-msg" data-punch-msg></div>
+      </div>
+      <aside class="p-side fx" style="transition-delay:.25s">
+        <!-- 프로필 카드: 이름+이메일 한 번에 저장 -->
+        <div class="profile" data-profile>
+          <div class="profile-label">내 정보</div>
+
+          <!-- (A) 편집 폼 — 저장 전/수정 시 -->
+          <div class="profile-form" data-profile-form>
+            <label class="pf-field">
+              <span>이름</span>
+              <input type="text" data-name-input placeholder="예) 홍길동" autocomplete="name">
+            </label>
+            <label class="pf-field">
+              <span>이메일</span>
+              <input type="email" data-email-input placeholder="예) hong@example.com" autocomplete="email">
+            </label>
+            <button class="pf-save" type="button" data-profile-save>저장</button>
+            <div class="pf-hint" data-profile-hint></div>
+          </div>
+
+          <!-- (B) 저장된 표시 — 저장 후 -->
+          <div class="profile-view" data-profile-view hidden>
+            <div class="pv-row"><span>이름</span><b data-my-name>—</b></div>
+            <div class="pv-row"><span>이메일</span><b data-my-email>—</b></div>
+            <button class="pf-edit" type="button" data-profile-edit>수정</button>
+          </div>
+        </div>
+
+        <div class="p-info">
+          출근 마감 — <b data-work-start>09:00</b><br>
+          나의 상태 — <span class="warn" data-my-state>미출근</span><br><br>
+          체크 즉시 Google Forms에 기록되고,<br>
+          판정과 안내 메일은 자동으로 처리됩니다.
+        </div>
+        <div class="demo-band" data-demo-band><b>시트 연결 대기</b> — 출퇴근 버튼은 실제 기록됩니다. 아래 숫자·명단은 아직 데모 데이터입니다</div>
+      </aside>
+    </div>
+  </section>
+  <hr class="rule-hair">
+
+  <!-- 01 오늘 -->
+  <section>
+    <div class="sec-grid">
+      <div class="sec-no fx">오늘의 기록<b>01</b></div>
+      <div id="todaySection">
+        <p class="statement fx">데이터를 불러오는 중…</p>
+      </div>
+    </div>
+  </section>
+  <hr class="rule-hair">
+
+  <!-- 02 확인 필요 -->
+  <section>
+    <div class="sec-grid">
+      <div class="sec-no fx">확인이 필요한 인원<b>02</b></div>
+      <div class="fx" style="transition-delay:.15s">
+        <table class="ledger">
+          <thead>
+            <tr><th style="width:110px">구분</th><th>이름</th><th style="width:120px">출근 시간</th><th style="width:120px">경과</th><th style="width:170px">안내 메일</th></tr>
+          </thead>
+          <tbody id="todayLedger">
+            <tr class="empty-row"><td colspan="5">불러오는 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <hr class="rule-hair">
+
+  <!-- 03 통계 예고 -->
+  <section>
+    <div class="sec-grid">
+      <div class="sec-no fx">더 깊은 숫자<b>03</b></div>
+      <div>
+        <a class="teaser fx" href="stats.html">
+          <span><h3>주간·월간 추이는 통계에서</h3><p>주별 출결 현황 · 일별 비율 · 개인별 누적 기록 · VBA 대조 일치율</p></span>
+          <span class="go">→</span>
+        </a>
+        <div class="mini-figures" id="miniFigures"></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule-heavy">
+  <footer>
+    <span>© 2026 출결기록실 — 실무프로젝트 1</span>
+    <span class="pipe">FORMS<i>/</i>SHEETS<i>/</i>MAKE<i>/</i>GEMINI<i>/</i>GMAIL</span>
+  </footer>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const D = await loadData();
+  showDemoBand(D.demo);
+  document.querySelector("[data-work-start]").textContent = CONFIG.WORK.start;
+  document.querySelector("[data-sync-label]").textContent = D.demo ? "데모 데이터" : "SHEETS 동기화";
+
+  const total = D.todayRecords.length;
+  const ok = D.count(D.todayRecords, "정상");
+  const late = D.count(D.todayRecords, "지각");
+  const abs = D.count(D.todayRecords, "결근");
+  const pct = (n) => total ? Math.round(n / total * 100) : 0;
+
+  /* 01 — 문장 + 플랫 바 */
+  document.getElementById("todaySection").innerHTML = `
+    <p class="statement fx in">오늘 <span class="num">${total}</span>명 중
+      <span class="num ok">${ok}</span>명이<br>정시에 도착했습니다.</p>
+    <div class="flatbar-wrap fx in">
+      <div class="flatbar">
+        <i class="fx-bar in" style="flex:${ok || .001};background:var(--ok)"></i>
+        <i class="fx-bar in" style="flex:${late || .001};background:var(--late);transition-delay:.45s"></i>
+        <i class="fx-bar in" style="flex:${abs || .001};background:var(--abs);transition-delay:.6s"></i>
+      </div>
+      <div class="flatbar-ticks">
+        <span><i class="sq ok"></i>정상 <b>${ok}</b> · ${pct(ok)}%</span>
+        <span><i class="sq late"></i>지각 <b>${late}</b> · ${pct(late)}%</span>
+        <span><i class="sq abs"></i>결근 <b>${abs}</b> · ${pct(abs)}%</span>
+      </div>
+    </div>`;
+
+  /* 02 — 오늘 지각·결근 원장 */
+  const need = D.todayRecords.filter((r) => r.status !== "정상");
+  const mailsToday = D.mails.filter((m) => m.date === D.today);
+  const mailOf = (name) => mailsToday.find((m) => m.name === name);
+  document.getElementById("todayLedger").innerHTML = need.length ? need.map((r) => {
+    const m = mailOf(r.name);
+    const lateMin = r.timeIn
+      ? `+${(parseInt(r.timeIn.slice(0,2))*60+parseInt(r.timeIn.slice(3))) - (parseInt(CONFIG.WORK.start.slice(0,2))*60+parseInt(CONFIG.WORK.start.slice(3)))}분`
+      : "미제출";
+    return `<tr>
+      <td>${stMark(r.status)}</td>
+      <td class="t-name">${r.name}</td>
+      <td class="t-time">${r.timeIn ?? "—"}</td>
+      <td class="t-time">${lateMin}</td>
+      <td class="t-sub">${m ? (m.state === "발송됨" ? `<b>발송됨</b> ${m.sentAt}` : "대기 중") : "대기 중"}</td>
+    </tr>`;
+  }).join("") : `<tr class="empty-row"><td colspan="5">오늘은 확인이 필요한 인원이 없습니다 — 전원 정시 출근</td></tr>`;
+
+  /* 03 — 미니 지표 */
+  const weekOk = D.count(D.records, "정상"), weekAll = D.records.length;
+  document.getElementById("miniFigures").innerHTML = `
+    <div class="mf fx in"><div class="k">최근 10일 정상 출근율</div><div class="v">${Math.round(weekOk/weekAll*100)}%</div></div>
+    <div class="mf fx in"><div class="k">최근 10일 지각</div><div class="v">${D.count(D.records,"지각")}건</div></div>
+    <div class="mf fx in"><div class="k">자동 발송 메일</div><div class="v">${D.mails.filter(m=>m.state==="발송됨").length}건</div></div>`;
+});
+</script>
+</body>
+</html>

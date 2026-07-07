@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출결기록실 — 근태 내역</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+
+  <div class="mast-meta">
+    <span data-mast-date>—</span>
+    <span><span class="dot-ok">●</span>&nbsp; <span data-sync-label>SHEETS 동기화</span></span>
+    <span class="meta-email" data-mast-email>이메일을 설정하세요</span>
+  </div>
+  <header class="mast">
+    <h1 class="wordmark"><a href="index.html">출결기록실</a><small>ATTENDANCE ARCHIVE · 실무프로젝트 1</small></h1>
+    <nav class="index">
+      <div class="idx-label">색인</div>
+      <a href="index.html"><b>01</b>오늘</a>
+      <a class="on" href="history.html"><b>02</b>근태 내역</a>
+      <a href="stats.html"><b>03</b>통계</a>
+      <a href="mail.html"><b>04</b>메일 이력</a>
+    </nav>
+  </header>
+  <hr class="rule-heavy">
+
+  <div class="page-head fx">
+    <div class="ph-no">02 — 근태 내역</div>
+    <h2>모든 기록은<br>장부에 남습니다.</h2>
+    <p>Google Sheets에 누적된 출결 원장 — 이름·상태·날짜로 찾아보세요.</p>
+  </div>
+
+  <div class="filters fx" style="transition-delay:.15s">
+    <span class="f-label">필터</span>
+    <select class="f-select" id="fStatus">
+      <option value="">전체 상태</option>
+      <option>정상</option><option>지각</option><option>결근</option>
+    </select>
+    <select class="f-select" id="fDate"><option value="">전체 날짜</option></select>
+    <input class="f-input" id="fName" type="search" placeholder="이름 검색">
+    <span class="f-count">총 <b id="fTotal">0</b>건</span>
+  </div>
+
+  <div class="fx" style="transition-delay:.25s;padding-bottom:90px">
+    <table class="ledger">
+      <thead>
+        <tr><th style="width:120px">날짜</th><th style="width:100px">구분</th><th>이름</th><th style="width:110px">출근</th><th style="width:110px">퇴근</th><th>이메일</th></tr>
+      </thead>
+      <tbody id="ledgerBody"></tbody>
+    </table>
+  </div>
+
+  <hr class="rule-heavy">
+  <footer>
+    <span>© 2026 출결기록실 — 실무프로젝트 1</span>
+    <span class="pipe">FORMS<i>/</i>SHEETS<i>/</i>MAKE<i>/</i>GEMINI<i>/</i>GMAIL</span>
+  </footer>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const D = await loadData();
+  document.querySelector("[data-sync-label]").textContent = D.demo ? "데모 데이터" : "SHEETS 동기화";
+
+  const body = document.getElementById("ledgerBody");
+  const fStatus = document.getElementById("fStatus");
+  const fDate = document.getElementById("fDate");
+  const fName = document.getElementById("fName");
+  const fTotal = document.getElementById("fTotal");
+
+  [...D.dates].reverse().forEach((d) => {
+    const opt = document.createElement("option");
+    opt.value = d; opt.textContent = d.replaceAll("-", ". ");
+    fDate.appendChild(opt);
+  });
+
+  const sorted = [...D.records].sort((a, b) => b.date.localeCompare(a.date) || a.name.localeCompare(b.name, "ko"));
+
+  function render() {
+    const rows = sorted.filter((r) =>
+      (!fStatus.value || r.status === fStatus.value) &&
+      (!fDate.value || r.date === fDate.value) &&
+      (!fName.value.trim() || r.name.includes(fName.value.trim()))
+    );
+    fTotal.textContent = rows.length;
+    body.innerHTML = rows.length ? rows.map((r) => `<tr>
+        <td class="t-time">${r.date.replaceAll("-", ". ")}</td>
+        <td>${stMark(r.status)}</td>
+        <td class="t-name">${r.name}</td>
+        <td class="t-time">${r.timeIn ?? "—"}</td>
+        <td class="t-time">${r.timeOut ?? "—"}</td>
+        <td class="t-sub">${r.email}</td>
+      </tr>`).join("")
+      : `<tr class="empty-row"><td colspan="6">조건에 맞는 기록이 없습니다</td></tr>`;
+  }
+
+  [fStatus, fDate].forEach((el) => el.addEventListener("change", render));
+  fName.addEventListener("input", render);
+  render();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출결기록실 — 통계</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+
+  <div class="mast-meta">
+    <span data-mast-date>—</span>
+    <span><span class="dot-ok">●</span>&nbsp; <span data-sync-label>SHEETS 동기화</span></span>
+    <span class="meta-email" data-mast-email>이메일을 설정하세요</span>
+  </div>
+  <header class="mast">
+    <h1 class="wordmark"><a href="index.html">출결기록실</a><small>ATTENDANCE ARCHIVE · 실무프로젝트 1</small></h1>
+    <nav class="index">
+      <div class="idx-label">색인</div>
+      <a href="index.html"><b>01</b>오늘</a>
+      <a href="history.html"><b>02</b>근태 내역</a>
+      <a class="on" href="stats.html"><b>03</b>통계</a>
+      <a href="mail.html"><b>04</b>메일 이력</a>
+    </nav>
+  </header>
+  <hr class="rule-heavy">
+
+  <div class="page-head fx">
+    <div class="ph-no">03 — 통계</div>
+    <h2>숫자로 읽는<br>우리의 아침.</h2>
+    <p>Google Sheets 누적 로그 기반 — 일별·개인별 출결 흐름.</p>
+  </div>
+
+  <!-- 요약 지표 -->
+  <section style="padding:64px 0 0">
+    <div class="mini-figures fx" id="figures"></div>
+  </section>
+
+  <!-- 일별 현황 -->
+  <section style="padding:100px 0 0">
+    <div class="sec-grid">
+      <div class="sec-no fx">일별 출결 현황<b>A</b></div>
+      <div class="fx" style="transition-delay:.15s">
+        <div class="week-rows" id="dayRows"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 개인별 누적 -->
+  <section style="padding:100px 0 110px">
+    <div class="sec-grid">
+      <div class="sec-no fx">개인별 누적<b>B</b></div>
+      <div class="fx" style="transition-delay:.15s">
+        <table class="ledger">
+          <thead>
+            <tr><th>이름</th><th style="width:150px">분포</th><th style="width:90px">정상</th><th style="width:90px">지각</th><th style="width:90px">결근</th><th style="width:110px">정상률</th></tr>
+          </thead>
+          <tbody id="personBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule-heavy">
+  <footer>
+    <span>© 2026 출결기록실 — 실무프로젝트 1</span>
+    <span class="pipe">FORMS<i>/</i>SHEETS<i>/</i>MAKE<i>/</i>GEMINI<i>/</i>GMAIL</span>
+  </footer>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const D = await loadData();
+  document.querySelector("[data-sync-label]").textContent = D.demo ? "데모 데이터" : "SHEETS 동기화";
+  const WEEK = ["일","월","화","수","목","금","토"];
+
+  /* 요약 지표 */
+  const all = D.records.length;
+  const okAll = D.count(D.records, "정상");
+  document.getElementById("figures").innerHTML = `
+    <div class="mf"><div class="k">기간</div><div class="v" style="font-size:22px;margin-top:14px">${D.dates[0].slice(5).replace("-","/")} — ${D.today.slice(5).replace("-","/")}</div></div>
+    <div class="mf"><div class="k">정상 출근율</div><div class="v"><span data-count="${Math.round(okAll/all*100)}">0</span>%</div></div>
+    <div class="mf"><div class="k">누적 지각</div><div class="v"><span data-count="${D.count(D.records,"지각")}">0</span>건</div></div>
+    <div class="mf"><div class="k">누적 결근</div><div class="v"><span data-count="${D.count(D.records,"결근")}">0</span>건</div></div>
+    <div class="mf"><div class="k">안내 메일</div><div class="v"><span data-count="${D.mails.length}">0</span>건</div></div>`;
+  animateCounters(document.getElementById("figures"));
+
+  /* 일별 현황 — 가로 플랫 바 */
+  document.getElementById("dayRows").innerHTML = D.dates.map((date) => {
+    const rows = D.records.filter((r) => r.date === date);
+    const ok = D.count(rows, "정상"), late = D.count(rows, "지각"), abs = D.count(rows, "결근");
+    const day = new Date(date + "T00:00:00");
+    const isToday = date === D.today;
+    return `<div class="week-row${isToday ? " is-today" : ""}">
+      <div class="w-day">${WEEK[day.getDay()]}<small>${date.slice(5).replace("-", "/")}${isToday ? " 오늘" : ""}</small></div>
+      <div class="w-bar">
+        <i style="flex:${ok || .001};background:var(--ok)"></i>
+        <i style="flex:${late || .001};background:var(--late)"></i>
+        <i style="flex:${abs || .001};background:var(--abs)"></i>
+      </div>
+      <div class="w-nums">정상 <b>${ok}</b> · 지각 <b>${late}</b> · 결근 <b>${abs}</b></div>
+    </div>`;
+  }).join("");
+
+  /* 개인별 누적 */
+  const names = [...new Set(D.records.map((r) => r.name))].sort((a,b)=>a.localeCompare(b,"ko"));
+  document.getElementById("personBody").innerHTML = names.map((name) => {
+    const mine = D.records.filter((r) => r.name === name);
+    const ok = D.count(mine, "정상"), late = D.count(mine, "지각"), abs = D.count(mine, "결근");
+    const rate = Math.round(ok / mine.length * 100);
+    return `<tr>
+      <td class="t-name">${name}</td>
+      <td><div class="mini-track">
+        <i style="flex:${ok || .001};background:var(--ok)"></i>
+        <i style="flex:${late || .001};background:var(--late)"></i>
+        <i style="flex:${abs || .001};background:var(--abs)"></i>
+      </div></td>
+      <td class="t-time">${ok}</td><td class="t-time">${late}</td><td class="t-time">${abs}</td>
+      <td class="t-time" style="font-weight:800">${rate}%</td>
+    </tr>`;
+  }).join("");
+});
+</script>
+</body>
+</html>
