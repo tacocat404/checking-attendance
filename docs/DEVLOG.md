@@ -97,3 +97,14 @@
   - 마스트헤드 이메일은 클릭 편집 제거하고 표시 전용(`data-mast-email`, 대문자)으로 정리 — 4개 페이지 공통
   - app.js: `bindInlineEditor` 제거 → `bindProfileEditors`/`showProfileView`로 폼 방식 재작성
   - **검증**(프리뷰 자동화): 초기 폼 표시 → 입력 후 저장 → 뷰 전환 + localStorage 저장 확인 → 출근 제출 payload에 이름·이메일 정상 포함 → 수정 재진입 → 잘못된 이메일 거부 및 기존값 보존까지 확인
+
+### [배포] GitHub 저장소 생성 및 푸시
+- **사용자 프롬프트(요약)**: DEVLOG·기획서 참고해 정리하고 GitHub에 푸시.
+- **결정**: 범위 = 출결기록실 폴더만 / 공개 = Public.
+- **Claude의 변경사항**:
+  - 배포 전 민감정보 스캔 — 백엔드 blueprint에 API 키·토큰·웹훅 시크릿 **없음**(팀원 이메일 1개만). config.js의 폼·시트 ID는 노출되나 시트가 원래 링크 공개 상태라 추가 노출 미미. README에 공개 저장소 주의 문구 명시
+  - `README.md`(프로젝트 개요·파이프라인·화면·설정·팀 구성), `.gitignore` 작성. `docs/DEVLOG.md`를 저장소 안에 복사
+  - `출결기록실/`를 저장소 루트로 `git init -b main` → 11개 파일 첫 커밋
+  - 사용자가 GitHub에서 저장소(`checking-attendance`) 생성 → 원격 연결 후 push 완료
+  - **저장소**: https://github.com/tacocat404/checking-attendance
+- **다음 단계**: (선택) GitHub Pages 배포로 실제 접속 주소 생성 / 백엔드팀에 Make 빈 행·VBA 시트 이슈 전달
